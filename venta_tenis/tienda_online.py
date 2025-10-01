@@ -1,11 +1,14 @@
 import sqlite3
 import getpass
 
+DB_CLIENTES = "clientes.db"
+DB_PRODUCTOS = "ventas_tenis.db"
+
 # 🔹 Conectar a ambas bases
 def conectar_db():
-    conn = sqlite3.connect("clientes.db")
+    conn = sqlite3.connect(DB_CLIENTES)
     cursor = conn.cursor()
-    cursor.execute("ATTACH DATABASE 'ventas_tenis.db' AS tienda")
+    cursor.execute(f"ATTACH DATABASE '{DB_PRODUCTOS}' AS tienda")
     return conn, cursor
 
 # ================= CLIENTES =================
@@ -93,8 +96,10 @@ def ver_carrito(id_cliente):
         print(f"{nombre} | Precio: {precio} | Cantidad: {cantidad} | Subtotal: {subtotal}")
     print(f"TOTAL: {total}\n")
 
+# ================= HISTORIAL Y VENTAS =================
 def crear_historial():
     conn, cursor = conectar_db()
+    # Historial del cliente
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS historial (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -104,6 +109,7 @@ def crear_historial():
         total REAL
     )
     """)
+    # Carrito
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS carrito (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -112,7 +118,7 @@ def crear_historial():
         cantidad INTEGER
     )
     """)
-    # Asegurarse que tabla de ventas existe en ventas_tenis.db
+    # Tabla de ventas para administrador
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS tienda.ventas (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -128,6 +134,7 @@ def crear_historial():
 def finalizar_compra(id_cliente):
     conn, cursor = conectar_db()
     
+    # Obtener productos del carrito
     cursor.execute("SELECT id_producto, cantidad FROM carrito WHERE id_cliente = ?", (id_cliente,))
     items = cursor.fetchall()
 
@@ -137,15 +144,15 @@ def finalizar_compra(id_cliente):
         return
 
     for id_producto, cantidad in items:
-        cursor.execute("SELECT precio, stock FROM tienda.productos WHERE id=?", (id_producto,))
+        cursor.execute("SELECT nombre, precio, stock FROM tienda.productos WHERE id=?", (id_producto,))
         resultado = cursor.fetchone()
         if not resultado:
             print(f"Producto ID {id_producto} no encontrado.")
             continue
 
-        precio, stock = resultado
+        nombre, precio, stock = resultado
         if stock < cantidad:
-            print(f"No hay stock suficiente para el producto ID {id_producto}.")
+            print(f"No hay stock suficiente para el producto {nombre}.")
             continue
 
         total = precio * cantidad
@@ -156,7 +163,7 @@ def finalizar_compra(id_cliente):
             VALUES (?, ?, ?, ?)
         """, (id_cliente, id_producto, cantidad, total))
 
-        # Registrar venta en tabla de ventas para administrador
+        # Registrar venta en tabla de ventas del administrador
         cursor.execute("""
             INSERT INTO tienda.ventas(id_cliente, id_producto, cantidad, total)
             VALUES (?, ?, ?, ?)
@@ -169,7 +176,7 @@ def finalizar_compra(id_cliente):
     cursor.execute("DELETE FROM carrito WHERE id_cliente=?", (id_cliente,))
     conn.commit()
     conn.close()
-    print("Compra finalizada. Productos movidos al historial, stock actualizado y venta registrada para administrador.\n")
+    print("Compra finalizada!!.\n")
 
 def ver_historial(id_cliente):
     conn, cursor = conectar_db()
