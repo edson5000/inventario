@@ -7,9 +7,10 @@ cursor = conn.cursor()
 # Crear tablas
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS productos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     nombre TEXT NOT NULL,
     talla REAL,
+    color TEXT,
     precio REAL,
     stock INTEGER
 )
@@ -17,7 +18,7 @@ CREATE TABLE IF NOT EXISTS productos (
 
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS clientes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY,
     nombre TEXT NOT NULL,
     correo TEXT
 )
@@ -36,3 +37,4 @@ CREATE TABLE IF NOT EXISTS ventas (
 """)
 
 conn.commit()
+conn.close()
