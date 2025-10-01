@@ -9,7 +9,6 @@ def conectar_db():
     return conn, cursor
 
 # ================= CLIENTES =================
-
 def registrar_cliente():
     conn, cursor = conectar_db()
     nombre = input("Nombre: ")
@@ -35,14 +34,13 @@ def login():
     conn.close()
 
     if resultado:
-        print("Login exitoso.\n")
+        print("Bienvenido.\n")
         return resultado[0]
     else:
         print("Correo o contraseña incorrectos.\n")
         return None
 
 # ================= FUNCIONES USUARIO =================
-
 def ver_productos():
     conn, cursor = conectar_db()
     cursor.execute("SELECT id, nombre, talla, precio, stock FROM tienda.productos")
@@ -106,11 +104,30 @@ def crear_historial():
         total REAL
     )
     """)
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS carrito (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_cliente INTEGER,
+        id_producto INTEGER,
+        cantidad INTEGER
+    )
+    """)
+    # Asegurarse que tabla de ventas existe en ventas_tenis.db
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS tienda.ventas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_cliente INTEGER,
+        id_producto INTEGER,
+        cantidad INTEGER,
+        total REAL
+    )
+    """)
     conn.commit()
     conn.close()
 
 def finalizar_compra(id_cliente):
     conn, cursor = conectar_db()
+    
     cursor.execute("SELECT id_producto, cantidad FROM carrito WHERE id_cliente = ?", (id_cliente,))
     items = cursor.fetchall()
 
@@ -121,29 +138,46 @@ def finalizar_compra(id_cliente):
 
     for id_producto, cantidad in items:
         cursor.execute("SELECT precio, stock FROM tienda.productos WHERE id=?", (id_producto,))
-        precio, stock = cursor.fetchone()
+        resultado = cursor.fetchone()
+        if not resultado:
+            print(f"Producto ID {id_producto} no encontrado.")
+            continue
 
+        precio, stock = resultado
         if stock < cantidad:
-            print(f"No hay stock suficiente para el producto {id_producto}.")
+            print(f"No hay stock suficiente para el producto ID {id_producto}.")
             continue
 
         total = precio * cantidad
-        cursor.execute("INSERT INTO historial(id_cliente, id_producto, cantidad, total) VALUES (?, ?, ?, ?)",
-                       (id_cliente, id_producto, cantidad, total))
-        cursor.execute("UPDATE tienda.productos SET stock = stock - ? WHERE id = ?", (cantidad, id_producto))
 
+        # Registrar venta en historial del cliente
+        cursor.execute("""
+            INSERT INTO historial(id_cliente, id_producto, cantidad, total) 
+            VALUES (?, ?, ?, ?)
+        """, (id_cliente, id_producto, cantidad, total))
+
+        # Registrar venta en tabla de ventas para administrador
+        cursor.execute("""
+            INSERT INTO tienda.ventas(id_cliente, id_producto, cantidad, total)
+            VALUES (?, ?, ?, ?)
+        """, (id_cliente, id_producto, cantidad, total))
+
+        # Actualizar stock en productos
+        cursor.execute("UPDATE tienda.productos SET stock = stock - ? WHERE id=?", (cantidad, id_producto))
+
+    # Limpiar carrito
     cursor.execute("DELETE FROM carrito WHERE id_cliente=?", (id_cliente,))
     conn.commit()
     conn.close()
-    print("Compra finalizada. Los productos se movieron al historial.\n")
+    print("Compra finalizada. Productos movidos al historial, stock actualizado y venta registrada para administrador.\n")
 
 def ver_historial(id_cliente):
     conn, cursor = conectar_db()
     cursor.execute("""
-    SELECT p.nombre, h.cantidad, h.total
-    FROM historial AS h
-    JOIN tienda.productos AS p ON h.id_producto = p.id
-    WHERE h.id_cliente = ?
+        SELECT p.nombre, h.cantidad, h.total
+        FROM historial AS h
+        JOIN tienda.productos AS p ON h.id_producto = p.id
+        WHERE h.id_cliente = ?
     """, (id_cliente,))
     compras = cursor.fetchall()
     conn.close()

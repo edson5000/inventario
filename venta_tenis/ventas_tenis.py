@@ -1,6 +1,5 @@
 import sqlite3
 
-# Conectar a la base de datos
 conn = sqlite3.connect("ventas_tenis.db")
 cursor = conn.cursor()
 

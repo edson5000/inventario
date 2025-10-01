@@ -2,7 +2,7 @@ import crud
 
 def menu():
     while True:
-        print("\n=== SISTEMA DE VENTAS DE TENIS ===")
+        print("\n=== SISTEMA DE VENTAS DE TENIS (ADMIN) ===")
         print("1. Crear producto")
         print("2. Listar productos")
         print("3. Actualizar producto")
@@ -11,9 +11,10 @@ def menu():
         print("6. Listar clientes")
         print("7. Eliminar cliente")
         print("8. Registrar venta")
-        print("9. Listar ventas")
-        print("10. Eliminar venta")
-        print("11. Salir")
+        print("9. Listar todas las ventas")
+        print("10. Listar ventas por cliente")
+        print("11. Eliminar venta")
+        print("12. Salir")
         opcion = input("Elige una opción: ")
 
         # ------------------ PRODUCTOS ------------------
@@ -27,7 +28,7 @@ def menu():
                 stock = int(input("Stock: "))
                 crud.crear_producto(id_prod, nombre, talla, color, precio, stock)
             except ValueError:
-                print("Entrada invalida, verifica los datos.")
+                print("Entrada inválida, verifica los datos.")
 
         elif opcion == "2":
             productos = crud.listar_productos()
@@ -48,14 +49,14 @@ def menu():
                 stock = int(input("Nuevo stock: "))
                 crud.actualizar_producto(id_producto, nombre, talla, color, precio, stock)
             except ValueError:
-                print("Entrada invalida, verifica los datos.")
+                print("Entrada inválida, verifica los datos.")
 
         elif opcion == "4":
             try:
                 id_producto = int(input("ID del producto a eliminar: "))
                 crud.eliminar_producto(id_producto)
             except ValueError:
-                print("Entrada invalida.")
+                print("Entrada inválida.")
 
         # ------------------ CLIENTES ------------------
         elif opcion == "5":
@@ -65,7 +66,8 @@ def menu():
                 correo = input("Correo del cliente: ")
                 crud.crear_cliente(id_cliente, nombre, correo)
             except ValueError:
-                print("Entrada invalida.")
+                print("Entrada inválida.")
+
         elif opcion == "6":
             clientes = crud.listar_clientes()
             if clientes:
@@ -75,8 +77,8 @@ def menu():
                     nombre = c[1]
                     correo = c[2] if len(c) > 2 else "No registrado"
                     print(f"ID: {id_c}, Nombre: {nombre}, Correo: {correo}")
-            else:           
-                     print("No hay clientes registrados.")
+            else:
+                print("No hay clientes registrados.")
 
         elif opcion == "7":
             try:
@@ -105,7 +107,7 @@ def menu():
         elif opcion == "9":
             ventas = crud.listar_ventas()
             if ventas:
-                print("\n--- Ventas ---")
+                print("\n--- Todas las ventas ---")
                 for v in ventas:
                     print(f"ID Venta: {v[0]}, Cliente: {v[1]}, Producto: {v[2]}, Cantidad: {v[3]}, Total: Bs{v[4]}")
             else:
@@ -113,18 +115,31 @@ def menu():
 
         elif opcion == "10":
             try:
+                id_cliente = int(input("ID del cliente para ver sus ventas: "))
+                ventas = crud.listar_ventas_por_cliente(id_cliente)
+                if ventas:
+                    print(f"\n--- Ventas del cliente ID {id_cliente} ---")
+                    for v in ventas:
+                        print(f"ID Venta: {v[0]}, Producto: {v[1]}, Cantidad: {v[2]}, Total: Bs{v[3]}")
+                else:
+                    print("El cliente no tiene ventas registradas.")
+            except ValueError:
+                print("Entrada inválida.")
+
+        elif opcion == "11":
+            try:
                 id_venta = int(input("ID de la venta a eliminar: "))
                 crud.eliminar_venta(id_venta)
             except ValueError:
                 print("Entrada inválida.")
 
         # ------------------ SALIR ------------------
-        elif opcion == "11":
+        elif opcion == "12":
             print("Saliendo del sistema...")
             break
 
         else:
-            print("Opcion invalida. Intenta nuevamente.")
+            print("Opción inválida. Intenta nuevamente.")
 
 if __name__ == "__main__":
     menu()

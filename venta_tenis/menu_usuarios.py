@@ -25,7 +25,7 @@ def sub_menu(id_cliente):
         elif opcion == "6":
             break
         else:
-            print("Opción invalida.\n")
+            print("Opcion invalida.\n")
 
 def menu():
     while True:
@@ -45,7 +45,7 @@ def menu():
             print("Gracias por visitarnos!!!...")
             break
         else:
-            print("Opción invalida.\n")
+            print("Opcion invalida.\n")
 
 if __name__ == "__main__":
     menu()
