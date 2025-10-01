@@ -4,7 +4,7 @@ import sqlite3
 conn = sqlite3.connect("clientes.db")
 cursor = conn.cursor()
 
-# Crear tabla de clientes
+# tabla de clientes
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS clientes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS clientes (
 )
 """)
 
-# Crear tabla de login
+# tabla de login
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS login (
     id_cliente INTEGER PRIMARY KEY,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS login (
 )
 """)
 
-# Crear tabla de carrito
+# tabla de carrito
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS carrito (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS carrito (
 )
 """)
 
-# Crear tabla historial de compras
+# tabla historial de compras
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS historial (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -127,16 +127,8 @@ def listar_ventas():
     ventas = cursor.fetchall()
     conn.close()
 
-    if not ventas:
-        print("No hay ventas registradas.\n")
-        return []
+    return ventas  # 👈 Solo devuelve la lista, no imprime
 
-    print("\n=== VENTAS REGISTRADAS ===")
-    for venta in ventas:
-        id_venta, cliente, producto, cantidad, total = venta
-        print(f"ID Venta: {id_venta} | Cliente: {cliente} | Producto: {producto} | Cantidad: {cantidad} | Total: Bs{total}")
-    print()
-    return ventas
 
 def listar_ventas_por_cliente(id_cliente):
     conn, cursor = get_connection()
