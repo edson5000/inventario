@@ -30,10 +30,12 @@ CREATE TABLE IF NOT EXISTS ventas (
     id_producto INTEGER,
     cantidad INTEGER,
     total REAL,
+    fecha_hora TEXT DEFAULT (datetime('now', 'localtime')),
     FOREIGN KEY (id_cliente) REFERENCES clientes(id),
     FOREIGN KEY (id_producto) REFERENCES productos(id)
 )
 """)
+
 
 conn.commit()
 conn.close()
